@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using dominio;
+﻿using dominio;
 using negocio;
+using System;
+using System.Windows.Forms;
 
 
 namespace Presentación
@@ -31,36 +24,111 @@ namespace Presentación
             Text = "Modificar Articulo";
         }
 
-        private void btnAceptar_Click(object sender, EventArgs e)
+        private void colorCampo()
         {
-           // Articulo art = new Articulo();
-            ArticuloNegocio negocio = new ArticuloNegocio();
-            
-            try
+            if (txtCodigo.Text == "")
+                txtCodigo.BackColor = System.Drawing.Color.Yellow;
+            else
+                txtCodigo.BackColor = System.Drawing.Color.White;
+
+            if (txtNombre.Text == "")
+                txtNombre.BackColor = System.Drawing.Color.Yellow;
+            else
+                txtNombre.BackColor = System.Drawing.Color.White;
+
+            if (txtDescripcion.Text == "")
+                txtDescripcion.BackColor = System.Drawing.Color.Yellow;
+            else
+                txtDescripcion.BackColor = System.Drawing.Color.White;
+
+            if ((txtPrecio.Text == "") || (!validarSoloNumeros(txtPrecio.Text)))
+                txtPrecio.BackColor = System.Drawing.Color.Yellow;
+            else
+                txtPrecio.BackColor = System.Drawing.Color.White;
+
+        }
+
+        private bool validarCampos()
+        {
+            if (txtCodigo.Text != "" && txtNombre.Text != "" && txtDescripcion.Text != "" && txtPrecio.Text != "" && validarSoloNumeros(txtPrecio.Text))
             {
-                if (articulo == null)
-                    articulo = new Articulo ();
-
-                articulo.Codigo = txtCodigo.Text;
-                articulo.Nombre = txtNombre.Text;
-                articulo.Descripcion = txtDescripcion.Text;
-                articulo.Precio = decimal.Parse(txtPrecio.Text);
-                articulo.ImagenUrl = txtUrlImagen.Text;
-                articulo.Marca = (Marca)cbxMarca.SelectedItem;
-                articulo.Categoria = (Categoria)cbxCategoria.SelectedItem;
-
-                if (articulo.Id != 0)
+                return true;
+            }
+            else
+            {
+                if (validarSoloNumeros(txtPrecio.Text))
                 {
-                    negocio.modificar(articulo);
-                    MessageBox.Show("Modificado Exitosamente...");
+                    colorCampo();
+                    MessageBox.Show("Hay campos sin completar...");
                 }
                 else
                 {
-                    negocio.agregar(articulo);
-                    MessageBox.Show("Agregado Exitosamente...");
+                    MessageBox.Show("El campo precio solo admite números y ","...");
+                    txtPrecio.BackColor = System.Drawing.Color.Yellow;
+                    colorCampo();
                 }
+                
+                return false;
+            }
+        }
 
-                Close();
+        private bool validarSoloNumeros(string cadena)
+        {
+            try
+            {
+                foreach (char caracter in cadena)
+                {
+                    if (!char.IsNumber(caracter) && caracter!= ',')
+                        return false;
+
+                    if ((caracter == ',') && (txtPrecio.Text.IndexOf(',') == 0))
+                    {
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+            return true;
+        }
+
+        private void btnAceptar_Click(object sender, EventArgs e)
+        {
+            
+            ArticuloNegocio negocio = new ArticuloNegocio();
+
+            try
+            {
+                if (articulo == null)
+                    articulo = new Articulo();
+
+                if (validarCampos())
+                {
+                    articulo.Codigo = txtCodigo.Text;
+                    articulo.Nombre = txtNombre.Text;
+                    articulo.Descripcion = txtDescripcion.Text;
+                    articulo.Precio = decimal.Parse(txtPrecio.Text);
+                    articulo.ImagenUrl = txtUrlImagen.Text;
+                    articulo.Marca = (Marca)cbxMarca.SelectedItem;
+                    articulo.Categoria = (Categoria)cbxCategoria.SelectedItem;
+
+                    if (articulo.Id != 0)
+                    {
+                        negocio.modificar(articulo);
+                        MessageBox.Show("Modificado Exitosamente...");
+                    }
+                    else
+                    {
+                        negocio.agregar(articulo);
+                        MessageBox.Show("Agregado Exitosamente...");
+                    }
+
+                    Close();
+                }
 
             }
             catch (Exception ex)
@@ -98,13 +166,15 @@ namespace Presentación
                     txtUrlImagen.Text = articulo.ImagenUrl;
                     cbxMarca.SelectedValue = articulo.Marca.Id;
                     cbxCategoria.SelectedValue = articulo.Categoria.Id;
-                   
+
                 }
             }
             catch (Exception ex)
             {
-               MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.ToString());
             }
         }
+
+       
     }
 }

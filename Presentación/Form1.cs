@@ -97,35 +97,45 @@ namespace Presentación
 
         private void btnVerArticulo_Click(object sender, EventArgs e)
         {
-            ////////////////////////////////////////////////////////////////////
-
-            ///// Hacer validacion no olvidarseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-                try
+           
+            try
+            {
+                Articulo seleccionado;
+                if (dgvArticulos.CurrentRow != null)
                 {
-                    if (dgvArticulos.CurrentRow.DataBoundItem!= null)
-                    { 
-                        Articulo seleccionado;
-                        seleccionado = (Articulo)dgvArticulos.CurrentRow.DataBoundItem;
-                        FormDescripcion artDescricion = new FormDescripcion(seleccionado);
-                        artDescricion.ShowDialog();
-                    }
+                    seleccionado = (Articulo)dgvArticulos.CurrentRow.DataBoundItem;
+                    FormDescripcion artDescricion = new FormDescripcion(seleccionado);
+                    artDescricion.ShowDialog();
                 }
-                catch (Exception ex)
-                {
-                    ///////////////////////////////////////////////////////////
-                    MessageBox.Show(ex.ToString());
+            }
 
-                }
+            catch (Exception ex)
+            {              
+                MessageBox.Show(ex.ToString());
+            }
         }
 
         private void btnEditar_Click(object sender, EventArgs e)
         {
-            Articulo seleccionado;
-            seleccionado = (Articulo)dgvArticulos.CurrentRow.DataBoundItem;
+            try
+            {
+                Articulo seleccionado;
 
-            FrmAltaArticulo modificar = new FrmAltaArticulo(seleccionado);
-            modificar.ShowDialog();
-            cargar();
+                if (dgvArticulos.CurrentRow != null)
+                {
+                    seleccionado = (Articulo)dgvArticulos.CurrentRow.DataBoundItem;
+
+                    FrmAltaArticulo modificar = new FrmAltaArticulo(seleccionado);
+                    modificar.ShowDialog();
+                    cargar();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
         }
 
         private void btnAgregar_Click(object sender, EventArgs e)
@@ -142,14 +152,17 @@ namespace Presentación
 
             try
             {
-                DialogResult repuesta  = MessageBox.Show("¿Vas a eliminar este articulo?","Eliminando",MessageBoxButtons.YesNo,MessageBoxIcon.Warning);
-                if (repuesta == DialogResult.Yes)
+                if (dgvArticulos.CurrentRow != null)
                 {
-                    seleccionado = (Articulo)dgvArticulos.CurrentRow.DataBoundItem;
-                    negocio.eliminar(seleccionado.Id);
-                    cargar();
+
+                    DialogResult repuesta = MessageBox.Show("¿Vas a eliminar este articulo?", "Eliminando", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (repuesta == DialogResult.Yes)
+                    {
+                        seleccionado = (Articulo)dgvArticulos.CurrentRow.DataBoundItem;
+                        negocio.eliminar(seleccionado.Id);
+                        cargar();
+                    }
                 }
-                
             }
             catch (Exception ex)
             {
@@ -198,18 +211,20 @@ namespace Presentación
 
             try
             {
-                if (cbxCampo.SelectedItem.ToString()== "Todos")
-                {
-                    dgvArticulos.DataSource = negocio.listar();
+                if (cbxCampo.SelectedItem != null)
+                { 
+                    if (cbxCampo.SelectedItem.ToString() == "Todos")
+                    {
+                        dgvArticulos.DataSource = negocio.listar();
+                    }
+                    else
+                    {
+                        string campo = cbxCampo.SelectedItem.ToString();
+                        string criterio = cbxCriterio.SelectedItem.ToString();
+                        dgvArticulos.DataSource = negocio.filtrar(campo, criterio);
+
+                    }
                 }
-                else
-                {
-                    string campo = cbxCampo.SelectedItem.ToString();
-                    string criterio = cbxCriterio.SelectedItem.ToString();
-                    dgvArticulos.DataSource = negocio.filtrar(campo, criterio);
-              
-                }
-         
             }
             catch (Exception ex)
             {
@@ -218,7 +233,6 @@ namespace Presentación
         }
 
     }
-
 
 }
 
